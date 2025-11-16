@@ -1,72 +1,216 @@
 import { test } from './fixtures.js'; 
-import { expect } from '@playwright/test'; 
+import { 
+  fillAllFields, 
+  expectFieldError, 
+  expectNoError 
+} from '../helpers/register.js';
+
+const URL = 'https://sssg.stg.samsonite-asia.com/register';
 
 test.describe('Register Fail',()=> {
-    test('Click "Create account" button with empty required fields', async({page, newUser}) => {
-        await page.goto('https://sssg.stg.samsonite-asia.com/register',{ waitUntil: 'domcontentloaded' });
 
-        const createAccountBtn = page.locator('button[data-onetag-type="signup"]');
-        await createAccountBtn.click();
-
-        const errorMessage = page.locator('.invalid-feedback');
-        await expect(errorMessage.nth(1)).toHaveText('Please select an item in the list'); //title
-        await expect(errorMessage.nth(2)).toHaveText('Please fill out this field.'); //FirstName
-        await expect(errorMessage.nth(3)).toHaveText('Please fill out this field.'); //LastName
-        await expect(errorMessage.nth(4)).toHaveText('Please fill out this field.'); //PhoneNumber
-        await expect(errorMessage.nth(5)).toHaveText('The date is invalid'); //DateOfBirth
-        await expect(errorMessage.nth(6)).toHaveText('Please fill out this field.'); //Email
-        await expect(errorMessage.nth(7)).toHaveText('Please fill out this field.'); //Password
-        await expect(errorMessage.nth(8)).toHaveText('Please fill out this field.'); //ConfirmPw
-        await expect(errorMessage.nth(9)).toHaveText('Please check this box if you want to proceed.'); //CheckboxAgreeToPrivacyPolicy
+    test.beforeEach(async ({ page }) => {
+    await page.goto(URL, { waitUntil: 'domcontentloaded' });
     });
+
+    test('Click "Create account" button with empty required fields', async({page}) => {
+        
+        await page.locator('button[data-onetag-type="signup"]').click();
+
+        await expectFieldError(page, '#registration-form-title', 'Please select an item in the list');
+        await expectFieldError(page, '#registration-form-fname', 'Please fill out this field.');
+        await expectFieldError(page, '#registration-form-lname', 'Please fill out this field.');
+        await expectFieldError(page, '#registration-form-phone', 'Please fill out this field.');
+        await expectFieldError(page, '#dob-combining', 'The date is invalid');
+        await expectFieldError(page, '#registration-form-email', 'Please fill out this field.');
+        await expectFieldError(page, '#registration-form-password', 'Please fill out this field.');
+        await expectFieldError(page, '#registration-form-password-confirm', 'Please fill out this field.');
+        await expectFieldError(page, '#accept-terms-condition', 'Please check this box if you want to proceed.');
+        
+    });
+
     test('Click "Create account" button without title', async({page, newUser}) => {
-        await page.goto('https://sssg.stg.samsonite-asia.com/register',{ waitUntil: 'domcontentloaded' });
-        await page.fill('#registration-form-fname', newUser.firstName);
-        await page.fill('#registration-form-lname', newUser.lastName);
-        await page.fill('#registration-form-phone', newUser.phone);
-        await page.fill('#registration-form-email', newUser.email);
-        await page.fill('#registration-form-password', newUser.password);
-        await page.fill('#registration-form-password-confirm', newUser.confirmPw);
+        
+        await fillAllFields(page, newUser)
+        await page.selectOption('#registration-form-title', '');
 
-        await page.selectOption('#day', newUser.dob.day);
-        await page.selectOption('select[name="month"]', newUser.dob.month);
-        await page.selectOption('#year', newUser.dob.year);
+        await page.locator('button[data-onetag-type="signup"]').click();
 
-        const checkbox = page.locator('label[for="accept-terms-condition"]');
-        await checkbox.setChecked(true);
+        await expectFieldError(page, '#registration-form-title', 'Please select an item in the list');
 
-        const createAccountBtn = page.locator('button[data-onetag-type="signup"]');
-        await createAccountBtn.click();
-
-        const errorMessage = page.locator('.invalid-feedback');
-        await expect(errorMessage.nth(1)).toHaveText('Please select an item in the list'); //title
+        // Các field khác không có lỗi
+        const fields = [
+            '#registration-form-fname',
+            '#registration-form-lname',
+            '#registration-form-phone',
+            '#registration-form-email',
+            '#registration-form-password',
+            '#registration-form-password-confirm',
+            '#dob-combining',
+            'label[for="accept-terms-condition"]'
+        ];
+        for (const f of fields) await expectNoError(page, f);
     });
-    test('Click "Create account" button without firstname', async({page, newUser}) => {
-        await page.goto('https://sssg.stg.samsonite-asia.com/register',{ waitUntil: 'domcontentloaded' });
 
-        await page.selectOption('#registration-form-title', newUser.title);
-        await page.fill('#registration-form-lname', newUser.lastName);
-        await page.fill('#registration-form-phone', newUser.phone);
-        await page.fill('#registration-form-email', newUser.email);
-        await page.fill('#registration-form-password', newUser.password);
-        await page.fill('#registration-form-password-confirm', newUser.confirmPw);
+    test('Click "Create account" button without firstname', async ({ page, newUser }) => {
+   
+        await fillAllFields (page, newUser)
+        await page.fill('#registration-form-fname', '');
+    
+        await page.locator('button[data-onetag-type="signup"]').click();
 
-        await page.selectOption('#day', newUser.dob.day);
-        await page.selectOption('select[name="month"]', newUser.dob.month);
-        await page.selectOption('#year', newUser.dob.year);
+        await expectFieldError(page,'#registration-form-fname', 'Please fill out this field.');
 
-        const checkbox = page.locator('label[for="accept-terms-condition"]');
-        await checkbox.setChecked(true);
+        // Các field khác không có lỗi
+        const fields = [
+            '#registration-form-title',
+            '#registration-form-lname',
+            '#registration-form-phone',
+            '#registration-form-email',
+            '#registration-form-password',
+            '#registration-form-password-confirm',
+            '#dob-combining',
+            'label[for="accept-terms-condition"]'
+        ];
 
-        const createAccountBtn = page.locator('button[data-onetag-type="signup"]');
-        await createAccountBtn.click();
-
-        const errorMessage = page.locator('.invalid-feedback');
-        const count = await errorMessage.count();
-
-        if(count > 1){
-            throw new Error(`Expected only 1 error for FirstName, but found ${count}`)
-        }
-        await expect(errorMessage.nth(2)).toHaveText('Please fill out this field.'); //FirstName
+        for (const f of fields) await expectNoError(page, f);
     });
+
+    test('Click "Create account" button without Lastname', async ({ page, newUser }) => {
+
+        await fillAllFields(page, newUser);
+        await page.fill('#registration-form-lname', '');
+        
+        await page.locator('button[data-onetag-type="signup"]').click();
+        await expectFieldError(page, '#registration-form-lname', 'Please fill out this field.');
+
+        // Các field khác không có lỗi
+        const fields = [
+            '#registration-form-title',
+            '#registration-form-fname',
+            '#registration-form-phone',
+            '#registration-form-email',
+            '#registration-form-password',
+            '#registration-form-password-confirm',
+            '#dob-combining',
+            'label[for="accept-terms-condition"]'
+        ];
+
+        for (const f of fields) await expectNoError(page, f);
+
+    });
+
+    test('Click "Create account" button without Phone Number', async ({ page, newUser }) => {
+   
+        await fillAllFields(page, newUser);
+        await page.fill('#registration-form-phone', '');
+        
+        await page.locator('button[data-onetag-type="signup"]').click();
+        await expectFieldError(page, '#registration-form-phone', 'Please fill out this field.');
+
+        const fields = [
+            '#registration-form-title',
+            '#registration-form-fname',
+            '#registration-form-lname',
+            '#registration-form-email',
+            '#registration-form-password',
+            '#registration-form-password-confirm',
+            '#dob-combining',
+            'label[for="accept-terms-condition"]'
+        ];
+
+        for (const f of fields) await expectNoError(page, f);
+    });
+
+    test('Click "Create account" button without date of birth', async ({ page, newUser }) => {
+        await fillAllFields(page, newUser);
+
+        // xoá DOB
+        await page.selectOption('#day', '');
+        await page.selectOption('select[name="month"]', '');
+        await page.selectOption('#year', '');
+
+        await page.locator('button[data-onetag-type="signup"]').click();
+
+        await expectFieldError(page, '#dob-combining', 'The date is invalid');
+
+        const fields = [
+            '#registration-form-title',
+            '#registration-form-fname',
+            '#registration-form-lname',
+            '#registration-form-phone',
+            '#registration-form-email',
+            '#registration-form-password',
+            '#registration-form-password-confirm',
+            'label[for="accept-terms-condition"]'
+        ];
+
+        for (const f of fields) await expectNoError(page, f);
+    });
+
+    test('Click "Create account" button without email', async ({ page, newUser }) => {
+        await fillAllFields(page, newUser);
+        await page.fill('#registration-form-email', '');
+
+        await page.locator('button[data-onetag-type="signup"]').click();
+
+        await expectFieldError(page, '#registration-form-email', 'Please fill out this field.');
+
+        const fields = [
+            '#registration-form-title',
+            '#registration-form-fname',
+            '#registration-form-lname',
+            '#registration-form-phone',
+            '#registration-form-password',
+            '#registration-form-password-confirm',
+            '#dob-combining',
+            'label[for="accept-terms-condition"]'
+        ];
+
+        for (const f of fields) await expectNoError(page, f);   
+    });
+
+    test('Click "Create account" button without password', async ({ page, newUser }) => {
+        await fillAllFields(page, newUser);
+        await page.fill('#registration-form-password', '');
+
+        await page.locator('button[data-onetag-type="signup"]').click();
+
+        await expectFieldError(page, '#registration-form-password', 'Please fill out this field.');
+
+        const fields = [
+            '#registration-form-title',
+            '#registration-form-fname',
+            '#registration-form-lname',
+            '#registration-form-phone',
+            '#registration-form-email',
+            '#registration-form-password-confirm',
+            '#dob-combining',
+            'label[for="accept-terms-condition"]'
+        ];
+
+        for (const f of fields) await expectNoError(page, f);
+    });
+
+    test('Click "Create account" button with invalid password', async ({ page, newUser }) => {
+        await fillAllFields(page, newUser);
+        await page.fill('#registration-form-password-confirm', newUser.confirmPw_error);
+
+        await page.locator('button[data-onetag-type="signup"]').click();
+
+        await expectFieldError(page, '#registration-form-password-confirm', 'Does not match the password');
+
+        const fields = [
+            '#registration-form-title',
+            '#registration-form-fname',
+            '#registration-form-lname',
+            '#registration-form-phone',
+            '#registration-form-email',
+            '#registration-form-password',
+            '#dob-combining',
+            'label[for="accept-terms-condition"]'
+        ];
+
+        for (const f of fields) await expectNoError(page, f);
+  });
 });
