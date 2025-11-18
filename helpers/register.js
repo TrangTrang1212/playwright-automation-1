@@ -14,7 +14,9 @@ export async function fillAllFields(page, user) {
     await page.selectOption('select[name="month"]', user.dob.month);
     await page.selectOption('#year', user.dob.year);
 
-    await page.locator('label[for="accept-terms-condition"]').setChecked(true);
+    
+
+
 }
 
 // Check 1 field bị lỗi
@@ -25,6 +27,6 @@ export async function expectFieldError(page, selector, expectedText) {
 
 // Check 1 field không có lỗi
 export async function expectNoError(page, selector) {
-    const error = page.locator(selector).locator('.. >> .invalid-feedback');
+    const error = page.locator(`${selector} ~ .invalid-feedback`);
     await expect(error).toBeHidden();
 }

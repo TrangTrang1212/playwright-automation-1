@@ -14,6 +14,12 @@ export default defineConfig({
     video: 'retain-on-failure',
     screenshot: 'on',
     trace: 'on-first-retry',
+
+    httpCredentials: {
+      username: 'storefront',
+      password: 'storefront2022',
+    },
+    baseURL: 'https://sssg.stg.samsonite-asia.com/',
   },
   projects: [
     { name: 'Chromium', use: { ...devices['Desktop Chrome'] } },
