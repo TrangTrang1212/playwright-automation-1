@@ -1,29 +1,39 @@
-// playwright.config.js
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
+import path from 'path';
+import { ENV } from './config/env.config.js';
+import { LOCALE } from './config/locale.config.js';
+
+function getBaseURL(country) {
+  const selectedEnv = process.env.ENV || 'stg';
+  return ENV[selectedEnv][country];
+}
 
 export default defineConfig({
-  testDir: './tests', // thư mục chứa test
+  testDir: './tests',
   timeout: 30 * 1000,
-  expect: {
-    timeout: 5000,
-  },
+  expect: { timeout: 5000 },
   use: {
-    headless: false, // bật false nếu muốn thấy browser chạy
+    headless: false,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     video: 'retain-on-failure',
     screenshot: 'on',
     trace: 'on-first-retry',
 
+  // Thêm credentials
     httpCredentials: {
-      username: 'storefront',
-      password: 'storefront2022',
-    },
-    baseURL: 'https://sssg.stg.samsonite-asia.com/',
-  },
-  projects: [
-    { name: 'Chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'Firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'WebKit', use: { ...devices['Desktop Safari'] } },
-  ],
+    username: process.env.BASIC_AUTH_USER || 'storefront',
+    password: process.env.BASIC_AUTH_PASSWORD || 'storefront2022',
+  }
+},
+projects: [
+    {
+      name: 'sg',
+      use: {
+        baseURL: getBaseURL('SG'),
+        locale: LOCALE.sg.language,
+        testDataFile: path.resolve(LOCALE.sg.data)
+      }
+    }
+  ]
 });

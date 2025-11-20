@@ -1,46 +1,40 @@
+// fixtures/newUser.js
 import { test as base } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { LOCALE } from '../config/locale.config.js';
 
-const counterPath = path.join(__dirname, 'phoneCounter.json');
+// Hàm sinh phone theo country
+const phoneFormat = {
+  SG: () => '8' + Math.floor(Math.random() * 1e7).toString().padStart(8, '0'),
 
-function readCounter() {
-  if (!fs.existsSync(counterPath)) {
-    fs.writeFileSync(counterPath, JSON.stringify({ current: 8 }, null, 2));
-  }
-  const data = JSON.parse(fs.readFileSync(counterPath, 'utf-8'));
-  return data.current || 8;
-}
-
-function writeCounter(value) {
-  fs.writeFileSync(counterPath, JSON.stringify({ current: value }, null, 2));
-}
+};
 
 export const test = base.extend({
-  newUser: async ({}, use) => {
-    let phoneCounter = readCounter();
+  localeData: async ({}, use, testInfo) => {
+    // Lấy locale từ tên project: sg, jp, th_th...
+    const localeKey = testInfo.project.name.toLowerCase();
+    const file = LOCALE[localeKey]?.data;
+    if (!file) throw new Error(`Không tìm thấy JSON data cho locale: ${localeKey}`);
+    const data = JSON.parse(fs.readFileSync(path.resolve(file), 'utf-8'));
+    await use(data);
+  },
 
-    phoneCounter++;
-
-    // chỉ lấy 8 chữ số, bắt đầu bằng 9
-    const phoneNumber = String(phoneCounter).padStart(7, '0'); // 7 chữ số sau 9
-    const phone = '9' + phoneNumber; // tổng 8 chữ số
-
-    writeCounter(phoneCounter);
+  newUser: async ({ localeData }, use, testInfo) => {
+    const country = testInfo.project.name.split('_')[0].toUpperCase(); // vd: 'SG'
+    const phone = (phoneFormat[country] ? phoneFormat[country]() : '90000000');
+    const timestamp = Date.now();
+    const email = `globee_${timestamp}@example.com`;
 
     const user = {
-      title: 'Miss',
-      firstName: 'Globee',
-      lastName: 'Test',
-      email: `globee_test${phoneCounter}@example.com`,
+      ...localeData,
+      email,
       phone,
-      password: '12345678',
-      confirmPw: '12345678',
-      confirmPw_error: '123456789',
-      dob: { day: '15', month: '6', year: '1995' }
+      confirmPassword: localeData.password
     };
 
-    console.log('Generated user phone:', phone); // kiểm tra
     await use(user);
   }
 });
+
+export const expect = base.expect;

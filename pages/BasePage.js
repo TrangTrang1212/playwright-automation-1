@@ -4,31 +4,23 @@ export class BasePage {
         this.page = page;
     }
 
-
-    async goto(url) {
-        await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-    }
-
     async click(selector) {
         await this.page.click(selector);
     }
-    async fill(selector, text) {
-        await this.page.fill(selector, text);  
+    
+    async type(selector, text) {
+        await this.page.fill(selector, text);
     }
 
-    async selectOption(selector, value) {
+    async select(selector, value) {
         await this.page.selectOption(selector, value);
     }
 
-    async getText(selector) {
-        return await this.page.textContent(selector);
+    async check(selector) {
+        const cb = this.page.locator(selector);
+        if (await cb.isVisible()) await cb.check({ force: true })
     }
-    async expectVisible(selector) {
-        await expect(this.page.locator(selector)).toBeVisible();
+    async uncheck(selector) {
+        await this.page.locator(selector).uncheck({ force: true });
     }
-
-    async expectText(selector, value) {
-        await expect(this.page.locator(selector)).toHaveText(value);
-    }  
 }
-module.exports = { BasePage };

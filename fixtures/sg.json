@@ -1,0 +1,9 @@
+{
+      "title": "Miss",
+      "firstName": "Globee",
+      "lastName": "Test",
+      "password": "12345678",
+      "confirmPassword": "12345678",
+      "confirmPassword_error": "123456789",
+      "dob": { "day": "15", "month": "6", "year": "1995" }
+}

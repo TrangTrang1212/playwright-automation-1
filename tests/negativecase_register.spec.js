@@ -7,205 +7,204 @@ import { RegisterPage } from '../pages/RegisterPage.js';
 
 
 test.describe('Register Fail',()=> {
-
+    let register;
     test.beforeEach(async ({ page }) => {
-    const registerPage = new RegisterPage(page);
-    await registerPage.open();
+    register = new RegisterPage(page);
+    await register.open();
     });
 
     test('Click "Create account" button with empty required fields', async({page}) => {
-        const registerPage = new RegisterPage(page);
-        
-        await registerPage.clickCreateAccount();
-
-        await expectFieldError(page, registerPage.titleSelect, 'Please select an item in the list');
-        await expectFieldError(page, registerPage.firstNameInput, 'Please fill out this field.');
-        await expectFieldError(page, registerPage.lastNameInput, 'Please fill out this field.');
-        await expectFieldError(page, registerPage.phoneInput, 'Please fill out this field.');
-        //await expectFieldError(page, registerPage.dobDaySelect, 'The date is invalid');
-        await expectFieldError(page, registerPage.emailInput, 'Please fill out this field.');
-        await expectFieldError(page, registerPage.passwordInput, 'Please fill out this field.');
-        await expectFieldError(page, registerPage.confirmPasswordInput, 'Please fill out this field.');
-        await expectFieldError(page, registerPage.termsCheckboxInput, 'Please check this box if you want to proceed.');
+        await register.clickCreateAccount();
+        const L = register.locators;
+        await expectFieldError(page, L.title, 'Please select an item in the list');
+        await expectFieldError(page, L.firstName, 'Please fill out this field.');
+        await expectFieldError(page, L.lastName, 'Please fill out this field.');
+        await expectFieldError(page, L.phone, 'Please fill out this field.');
+        //await expectFieldError(page, L.dobDay, 'The date is invalid');
+        await expectFieldError(page, L.email, 'Please fill out this field.');
+        await expectFieldError(page, L.password, 'Please fill out this field.');
+        await expectFieldError(page, L.confirmPassword, 'Please fill out this field.');
+        await expectFieldError(page, L.terms, 'Please check this box if you want to proceed.');
         
     });
 
-    test('Click "Create account" button without title', async({page, newUser}) => {
-        
-        const registerPage = new RegisterPage(page);
-        await registerPage.fillRegisterCustomerDetailsForm({...newUser, title: ''});
-       await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
+    test('Missing Title', async({page, newUser}) => {
+        await register.fillRegisterCustomerDetailsForm({...newUser, title: ''});
+        await register.acceptTerms();
 
-        await expectFieldError(page, registerPage.titleSelect, 'Please select an item in the list');
+        await register.clickCreateAccount();
+
+        await expectFieldError(page, register.locators.title, 'Please select an item in the list');
 
         // Các field khác không có lỗi
         const noErrorFields = [
-            registerPage.firstNameInput,
-            registerPage.lastNameInput,
-            registerPage.phoneInput,
-            registerPage.emailInput,
-            registerPage.passwordInput,
-            registerPage.confirmPasswordInput,
-            registerPage.dobDaySelect,
-            registerPage.termsCheckboxInput
+            register.locators.firstName,
+            register.locators.lastName,
+            register.locators.phone,
+            register.locators.email,
+            register.locators.password,
+            register.locators.confirmPassword,
+            register.locators.dobDay,
+            register.locators.terms 
         ];
         for (const f of noErrorFields) await expectNoError(page, f);
     });
 
-    test('Click "Create account" button without firstname', async ({ page, newUser }) => {
-        const registerPage = new RegisterPage(page);
+    test('Missing First Name', async ({ page, newUser }) => {
         
-        await registerPage.fillRegisterCustomerDetailsForm({...newUser, firstName: ''});
-        await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
-        await expectFieldError(page, registerPage.firstNameInput, 'Please fill out this field.');
+        await register.fillRegisterCustomerDetailsForm({...newUser, firstName: ''});
+        await register.acceptTerms();
+
+        await register.clickCreateAccount();
+        
+        await expectFieldError(page, register.locators.firstName, 'Please fill out this field.');
 
         // Các field khác không có lỗi
         const noErrorFields = [
-            registerPage.titleSelect,
-            registerPage.lastNameInput,
-            registerPage.phoneInput,
-            registerPage.emailInput,
-            registerPage.passwordInput,
-            registerPage.confirmPasswordInput,
-            registerPage.dobDaySelect,
-            registerPage.termsCheckboxInput
+            register.locators.title,
+            register.locators.lastName,
+            register.locators.phone,
+            register.locators.email,
+            register.locators.password,
+            register.locators.confirmPassword,
+            register.locators.dobDay,
+            register.locators.terms
         ];
 
         for (const f of noErrorFields) await expectNoError(page, f);
     });
 
-    test('Click "Create account" button without Lastname', async ({ page, newUser }) => {
+    test('Missing Last Name', async ({ page, newUser }) => {
 
-        const registerPage = new RegisterPage(page);
-        await registerPage.fillRegisterCustomerDetailsForm({...newUser, lastName: ''});
-        await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
-        await expectFieldError(page, registerPage.lastNameInput, 'Please fill out this field.');
+        await register.fillRegisterCustomerDetailsForm({...newUser, lastName: ''});
+        await register.acceptTerms();
+
+        await register.clickCreateAccount();
+
+        await expectFieldError(page, register.locators.lastName, 'Please fill out this field.');
         
         // Các field khác không có lỗi
         const noErrorFields = [
-            registerPage.titleSelect,
-            registerPage.firstNameInput,
-            registerPage.phoneInput,
-            registerPage.emailInput,
-            registerPage.passwordInput,
-            registerPage.confirmPasswordInput,
-            registerPage.dobDaySelect,
-            registerPage.termsCheckboxInput
+            register.locators.title,
+            register.locators.firstName,
+            register.locators.phone,
+            register.locators.email,
+            register.locators.password,
+            register.locators.confirmPassword,
+            register.locators.dobDay,
+            register.locators.terms
         ];
 
         for (const f of noErrorFields) await expectNoError(page, f);
 
     });
 
-    test('Click "Create account" button without Phone Number', async ({ page, newUser }) => {
-        const registerPage = new RegisterPage(page);
-        
-        await registerPage.fillRegisterCustomerDetailsForm({...newUser, phone: ''});
-        await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
-        await expectFieldError(page, registerPage.phoneInput, 'Please fill out this field.');
+    test('Missing Phone Number', async ({ page, newUser }) => {
+        await register.fillRegisterCustomerDetailsForm({...newUser, phone: ''});
+        await register.acceptTerms();
+
+        await register.clickCreateAccount();
+
+        await expectFieldError(page, register.locators.phone, 'Please fill out this field.');
 
         const noErrorFields = [
-            registerPage.titleSelect,
-            registerPage.firstNameInput,
-            registerPage.lastNameInput,
-            registerPage.emailInput,
-            registerPage.passwordInput,
-            registerPage.confirmPasswordInput,
-            registerPage.dobDaySelect,
-            registerPage.termsCheckboxInput
+            register.locators.title,
+            register.locators.firstName,
+            register.locators.lastName,
+            register.locators.email,
+            register.locators.password,
+            register.locators.confirmPassword,
+            register.locators.dobDay,
+            register.locators.terms
         ];
 
         for (const f of noErrorFields) await expectNoError(page, f);
     });
+/*
+    test('Click "Create account" button without date of birth', async ({ page, newUser }) => {
+        await register.fillRegisterCustomerDetailsForm(newUser);
+        await register.page.selectOption(register.locators.dobMonth, '');
+        await register.page.selectOption(register.locators.dobYear, '');
+        await register.acceptTerms();
 
-    /*test('Click "Create account" button without date of birth', async ({ page, newUser }) => {
-        const registerPage = new RegisterPage(page);
-        await registerPage.fillRegisterCustomerDetailsForm(newUser);
-        await registerPage.page.selectOption(registerPage.dobMonthSelect, '');
-        await registerPage.page.selectOption(registerPage.dobYearSelect, '');
-        await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
+        await register.clickCreateAccount();
 
 
         const noErrorFields = [
-            registerPage.titleSelect,
-            registerPage.firstNameInput,
-            registerPage.lastNameInput,         
-            registerPage.phoneInput,
-            registerPage.emailInput,
-            registerPage.passwordInput,
-            registerPage.confirmPasswordInput,
-            registerPage.termsCheckboxInput
+            register.locators.title,
+            register.locators.firstName,
+            register.locators.lastName,         
+            register.locators.phone,
+            register.locators.email,
+            register.locators.password,
+            register.locators.confirmPassword,
+            register.locators.terms
         ];
 
         for (const f of noErrorFields) await expectNoError(page, f);
     });
 */
-    test('Click "Create account" button without email', async ({ page, newUser }) => {
-        const registerPage = new RegisterPage(page);
-        await registerPage.fillRegisterCustomerDetailsForm({...newUser, email: ''});
-        await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
+    test('Missing Email', async ({ page, newUser }) => {
 
-        await expectFieldError(page, registerPage.emailInput, 'Please fill out this field.');
+        await register.fillRegisterCustomerDetailsForm({...newUser, email: ''});
+        await register.acceptTerms();
+
+        await register.clickCreateAccount();
+
+        await expectFieldError(page, register.locators.email, 'Please fill out this field.');
+
         const noErrorFields = [
-            registerPage.titleSelect,
-            registerPage.firstNameInput,
-            registerPage.lastNameInput,
-            registerPage.phoneInput,
-            registerPage.passwordInput,
-            registerPage.confirmPasswordInput,
-            registerPage.dobDaySelect,
-            registerPage.termsCheckboxInput
+            register.locators.title,
+            register.locators.firstName,
+            register.locators.lastName,
+            register.locators.phone,
+            register.locators.password,
+            register.locators.confirmPassword,
+            register.locators.dobDay,
+            register.locators.terms
         ];
 
         for (const f of noErrorFields) await expectNoError(page, f);   
     });
 
-    test('Click "Create account" button without password', async ({ page, newUser }) => {
-        const registerPage = new RegisterPage(page);
-        await registerPage.fillRegisterCustomerDetailsForm(newUser);
-        
-        await registerPage.type('#registration-form-password', '');
-        await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
+    test('Missing Password', async ({ page, newUser }) => {
 
-        await expectFieldError(page, registerPage.passwordInput, 'Please fill out this field.');
+        await register.fillRegisterCustomerDetailsForm({...newUser, password: ''});
+        await register.acceptTerms();
+        
+        await register.clickCreateAccount();
+
+        await expectFieldError(page, register.locators.password, 'Please fill out this field.');
         const noErrorFields = [
-            registerPage.titleSelect,
-            registerPage.firstNameInput,
-            registerPage.lastNameInput,
-            registerPage.phoneInput,
-            registerPage.emailInput,
-            registerPage.confirmPasswordInput,
-            registerPage.dobDaySelect,
-            registerPage.termsCheckboxInput
+            register.locators.title,
+            register.locators.firstName,
+            register.locators.lastName,
+            register.locators.phone,
+            register.locators.email,
+            register.locators.confirmPassword,
+            register.locators.dobDay,
+            register.locators.terms
         ];
 
         for (const f of noErrorFields) await expectNoError(page, f);
     });
 
-    test('Click "Create account" button with invalid password', async ({ page, newUser }) => {
-        const registerPage = new RegisterPage(page);
-        await registerPage.fillRegisterCustomerDetailsForm(newUser);
-        await registerPage.type('#registration-form-password-confirm', newUser.confirmPw_error);
-        await registerPage.checkTerms();
-        await registerPage.clickCreateAccount();
+    test('Invalid confirm password', async ({ page, newUser }) => {
+        await register.fillRegisterCustomerDetailsForm({...newUser, confirmPassword: newUser.confirmPassword_error});
+        await register.acceptTerms();
 
-        await expectFieldError(page, registerPage.confirmPasswordInput, 'Does not match the password');
+        await register.clickCreateAccount();
+
+        await expectFieldError(page, register.locators.confirmPassword, 'Does not match the password');
         const noErrorFields = [
-            registerPage.titleSelect,
-            registerPage.firstNameInput,
-            registerPage.lastNameInput,
-            registerPage.phoneInput,
-            registerPage.emailInput,
-            registerPage.passwordInput,
-            registerPage.dobDaySelect,
-            registerPage.termsCheckboxInput
+            register.locators.title,
+            register.locators.firstName,
+            register.locators.lastName,
+            register.locators.phone,
+            register.locators.email,
+            register.locators.password,
+            register.locators.dobDay,
+            register.locators.terms
         ];
 
         for (const f of noErrorFields) await expectNoError(page, f);
